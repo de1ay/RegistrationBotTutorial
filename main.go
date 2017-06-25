@@ -7,6 +7,8 @@ import (
 var telegramBot src.TelegramBot
 
 func main() {
-	telegramBot.Init()
-	telegramBot.Start()
+	src.Connection.Init()
+	src.Connection.Find(1231)
+	//telegramBot.Init()
+	//telegramBot.Start()
 }
