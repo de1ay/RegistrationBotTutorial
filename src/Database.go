@@ -10,15 +10,16 @@ import (
 var Connection DatabaseConnection
 
 type User struct {
-	ChatID      int64 `json:"chat_id"`
-	PhoneNumber string `json:"phone_number"`
+	Chat_ID      int64
+	Phone_Number string
 }
 
 type DatabaseConnection struct {
-	Session *mgo.Session
-	DB      *mgo.Database
+	Session *mgo.Session  // Соединение с сервером
+	DB      *mgo.Database // Соединение с базой данных
 }
 
+// Инициализация соединения с БД
 func (connection *DatabaseConnection) Init() {
 	session, err := mgo.Dial(conf.MONGODB_CONNECTION_URL)
 	if err != nil {
@@ -29,6 +30,7 @@ func (connection *DatabaseConnection) Init() {
 	connection.DB = db
 }
 
+// Проверка на существование пользователя
 func (connection *DatabaseConnection) Find(chatID int64) (bool, error) {
 	collection := connection.DB.C(conf.MONGODB_COLLECTION_USERS)
 	count, err := collection.Find(bson.M{"chat_id": chatID}).Count()
@@ -39,6 +41,7 @@ func (connection *DatabaseConnection) Find(chatID int64) (bool, error) {
 	}
 }
 
+// Получение пользователя
 func (connection *DatabaseConnection) GetUser(chatID int64) (User, error) {
 	var result User
 	find, err := connection.Find(chatID)
@@ -54,8 +57,16 @@ func (connection *DatabaseConnection) GetUser(chatID int64) (User, error) {
 	}
 }
 
+// Создание пользователя
 func (connection *DatabaseConnection) CreateUser(user User) error {
 	collection := connection.DB.C(conf.MONGODB_COLLECTION_USERS)
 	err := collection.Insert(user)
+	return err
+}
+
+// Обновление номера мобильного телефона
+func (connection *DatabaseConnection) UpdateUser(user User) error {
+	collection := connection.DB.C(conf.MONGODB_COLLECTION_USERS)
+	err := collection.Update(bson.M{"chat_id": user.Chat_ID}, &user)
 	return err
 }
